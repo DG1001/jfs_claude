@@ -37,10 +37,14 @@ function initializeEventListeners() {
 }
 
 function handleFileSelect(event) {
+    console.log('File selection triggered:', event.target.files);
     const file = event.target.files[0];
     if (file) {
+        console.log('File selected:', file.name, file.type, file.size);
         showPreview(file);
         enableUploadButton();
+    } else {
+        console.log('No file selected');
     }
 }
 
