@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnapPic - Galerie</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#2196F3">
+    <link rel="icon" href="{{ url_for('static', filename='icon-192.png') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🖼️ SnapPic Galerie</h1>
+            <p>Aktuelle Fotos - aktualisiert alle 2 Sekunden</p>
+        </header>
+
+        <main>
+            <div class="gallery-grid" id="galleryGrid">
+                <div class="loading-message">
+                    <div class="loading-spinner"></div>
+                    <p>Lade Fotos...</p>
+                </div>
+            </div>
+
+            <div class="gallery-info">
+                <div class="info-item">
+                    <span class="info-label">Aktive Fotos:</span>
+                    <span id="imageCount">0</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Letztes Update:</span>
+                    <span id="lastUpdate">-</span>
+                </div>
+            </div>
+        </main>
+
+        <div class="actions">
+            <a href="/" class="upload-link">
+                📸 Neues Foto
+            </a>
+        </div>
+
+        <div id="message" class="message" style="display: none;"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        // Gallery-specific functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            loadGallery();
+            setInterval(loadGallery, 2000); // Refresh every 2 seconds
+        });
+
+        function loadGallery() {
+            fetch('/api/images')
+                .then(response => response.json())
+                .then(data => {
+                    const gallery = document.getElementById('galleryGrid');
+                    const imageCount = document.getElementById('imageCount');
+                    const lastUpdate = document.getElementById('lastUpdate');
+                    
+                    // Update counters
+                    const visibleImages = data.filter(img => img.state === 'visible' || img.state === 'fading');
+                    imageCount.textContent = visibleImages.length;
+                    lastUpdate.textContent = new Date().toLocaleTimeString();
+                    
+                    // Clear gallery
+                    gallery.innerHTML = '';
+                    
+                    if (visibleImages.length === 0) {
+                        gallery.innerHTML = '<div class="empty-gallery"><p>Keine Fotos vorhanden</p><p>Lade das erste Foto hoch!</p></div>';
+                        return;
+                    }
+                    
+                    // Add images
+                    visibleImages.forEach(image => {
+                        const imgElement = document.createElement('div');
+                        imgElement.className = `gallery-item ${image.state}`;
+                        
+                        const uploadTime = new Date(image.timestamp);
+                        const timeAgo = getTimeAgo(uploadTime);
+                        
+                        imgElement.innerHTML = `
+                            <div class="image-container">
+                                <img src="/uploads/${image.filename}" alt="Foto" loading="lazy">
+                                <div class="image-overlay">
+                                    <div class="image-info">
+                                        <p class="image-comment">${image.comment || 'Kein Kommentar'}</p>
+                                        <p class="image-time">${timeAgo}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        gallery.appendChild(imgElement);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading gallery:', error);
+                    document.getElementById('galleryGrid').innerHTML = '<div class="error-message">Fehler beim Laden der Galerie</div>';
+                });
+        }
+
+        function getTimeAgo(date) {
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            
+            if (seconds < 10) return 'gerade eben';
+            if (seconds < 60) return `vor ${seconds}s`;
+            if (seconds < 3600) return `vor ${Math.floor(seconds / 60)}min`;
+            return `vor ${Math.floor(seconds / 3600)}h`;
+        }
+    </script>
+</body>
+</html>

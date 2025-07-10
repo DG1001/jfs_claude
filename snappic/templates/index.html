@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnapPic - Foto Upload</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#2196F3">
+    <link rel="icon" href="{{ url_for('static', filename='icon-192.png') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📸 SnapPic</h1>
+            <p>Teile deine Momente für 5 Sekunden</p>
+        </header>
+
+        <main>
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="upload-section">
+                    <label for="fileInput" class="file-label">
+                        <div class="camera-icon">📷</div>
+                        <span>Foto aufnehmen oder auswählen</span>
+                    </label>
+                    <input type="file" id="fileInput" name="file" accept="image/*" capture="environment" required>
+                    
+                    <div class="preview-container" id="previewContainer" style="display: none;">
+                        <img id="previewImage" alt="Vorschau">
+                        <button type="button" id="removePreview" class="remove-btn">✕</button>
+                    </div>
+                </div>
+
+                <div class="comment-section">
+                    <label for="comment">Kommentar (optional)</label>
+                    <input type="text" id="comment" name="comment" maxlength="100" placeholder="Beschreibe dein Foto...">
+                    <div class="char-counter">
+                        <span id="charCount">0</span>/100
+                    </div>
+                </div>
+
+                <button type="submit" id="uploadBtn" class="upload-btn" disabled>
+                    <span class="btn-text">Foto teilen</span>
+                    <div class="loading-spinner" style="display: none;"></div>
+                </button>
+            </form>
+
+            <div class="actions">
+                <a href="/gallery" class="gallery-link">
+                    🖼️ Zur Galerie
+                </a>
+            </div>
+        </main>
+
+        <div id="message" class="message" style="display: none;"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
